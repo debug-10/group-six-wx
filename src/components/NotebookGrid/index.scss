@@ -1,0 +1,27 @@
+.notebook-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); // 每⾏显示3个宫格
+  gap: 30rpx; // 宫格之间的间距
+  padding: 20rpx;
+  .notebook-item {
+  border: 1px solid #ddd;
+  border-radius: 8rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 4rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+  text-align: center;
+  height: 280rpx;
+  line-height: 280rpx;
+  .tip{
+  position: absolute;
+  top:0;
+  right:20rpx;
+  width: 60rpx;
+  height: 60rpx;
+  }
+  .notebook-title {
+  font-size: 30rpx;
+  color:#333;
+  }
+  }
+ }

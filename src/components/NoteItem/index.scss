@@ -1,0 +1,29 @@
+.note-item {
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+  height: 100rpx;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .note-title {
+    font-size: 28px;
+    margin-bottom: 10rpx;
+  }
+
+  .note-tags {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    .tag {
+     padding: 8px 15px;
+     border-radius: 8px;
+     margin: 0 5px;
+      background-color: #4594D5;
+      color:#fff;
+      font-size: 24px;
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "css.taro-develop-enhanced",
+    "formulahendry.auto-rename-tag",
+    "editorconfig.editorconfig",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "dsznajder.es7-react-js-snippets",
+    "stylelint.vscode-stylelint"
+  ]
+}

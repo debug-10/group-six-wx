@@ -1,0 +1,76 @@
+.loginPage {
+  padding: 40px 32px;
+
+  .form {
+    margin-top: 40px;
+
+    .input {
+      height: 88px;
+      background: #f7f7f7;
+      border-radius: 44px;
+      padding: 0 40px;
+      margin-bottom: 32px;
+    }
+
+    .code {
+      display: flex;
+      align-items: center;
+      margin-bottom: 32px;
+
+      .password {
+        flex: 1;
+        height: 88px;
+        background: #f7f7f7;
+        border-radius: 44px;
+        padding: 0 40px;
+      }
+
+      .btn {
+        width: 200px;
+        text-align: center;
+        color: #1296db;
+      }
+    }
+
+    .button {
+      width: 100%;
+      height: 88px;
+      background: #1296db;
+      border-radius: 44px;
+      color: #fff;
+      font-size: 32px;
+      margin-top: 48px;
+    }
+  }
+
+  .extra {
+    margin-top: 80px;
+
+    .caption {
+      text-align: center;
+      color: #999;
+      font-size: 24px;
+      margin-bottom: 40px;
+    }
+
+    .options {
+      display: flex;
+      justify-content: center;
+
+      .icon {
+        font-size: 28px;
+        color: #333;
+      }
+    }
+  }
+
+  .tips {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    text-align: center;
+    color: #999;
+    font-size: 24px;
+  }
+}
