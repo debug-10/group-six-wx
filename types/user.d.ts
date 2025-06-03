@@ -31,6 +31,8 @@ interface AccountLoginDTO {
 }
 
 interface AccountLoginVO {
+  id: number
+  username: string
   accessToken: string
   refreshToken: string
 }

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
-import { sendCode, mobileLogin, getUserInfo, accountLogin } from '@/service/user'
+import { sendCode, mobileLogin, getUserInfo, accountLogin, wechatLogin } from '@/service/user'
 import { isPhoneAvailable, isCodeAvailable } from '@/utils/validate'
 import Taro from '@tarojs/taro'
 import { setUserInfo } from '@/store/user'
@@ -12,6 +12,7 @@ const Login = () => {
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(60)
   const [timer, setTimer] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [mobileForm, setMobileForm] = useState<MobileLoginDTO>({
     mobile: '',
     code: '',
@@ -20,6 +21,8 @@ const Login = () => {
     username: '',
     password: '',
   })
+
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     let interval
@@ -35,89 +38,112 @@ const Login = () => {
         })
       }, 1000)
     }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
   }, [timer])
 
   const sendMobileCode = async () => {
-    if (form.mobile && isPhoneAvailable(form.mobile)) {
-      setTimer(true)
-      const res = await sendCode(form.mobile)
-      if (res.code === 0) {
+    if (!mobileForm.mobile || !isPhoneAvailable(mobileForm.mobile)) {
+      Taro.showToast({
+        title: '请输入正确的手机号',
+        icon: 'none',
+      })
+      return
+    }
+
+    setTimer(true)
+    try {
+      const res = await sendCode(mobileForm.mobile)
+      if (res.data.code === 0) {
         Taro.showToast({
           title: '验证码发送成功',
           icon: 'success',
         })
       } else {
         Taro.showToast({
-          title: '验证码发送失败',
-          icon: 'error',
+          title: res.data.msg || '验证码发送失败',
+          icon: 'none',
         })
+        setTimer(false)
+        setCount(60)
       }
-    } else {
+    } catch (error) {
+      console.error('发送验证码失败:', error)
       Taro.showToast({
-        title: '请输入正确的手机号',
+        title: '网络错误，请重试',
         icon: 'none',
       })
+      setTimer(false)
+      setCount(60)
     }
   }
-
-  const dispatch = useAppDispatch()
 
   const getLoginUserInfo = async () => {
-    const res = await getUserInfo()
-    if (res.code === 0) {
-      dispatch(setUserInfo(res.data))
-      console.log(res.data)
-      Taro.setStorageSync('user', res.data)
-    } else {
-      Taro.showToast({
-        title: res.msg,
-        icon: 'none',
-      })
+    try {
+      const res = await getUserInfo()
+      if (res.data.code === 0) {
+        dispatch(setUserInfo(res.data.data))
+        Taro.setStorageSync('user', res.data.data)
+      } else {
+        console.error('获取用户信息失败:', res.data.msg)
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
     }
   }
 
-  const handleLoginClick = async () => {
-    if (!form.mobile || !isPhoneAvailable(form.mobile)) {
+  const handleMobileLogin = async () => {
+    if (!mobileForm.mobile || !isPhoneAvailable(mobileForm.mobile)) {
       Taro.showToast({
         title: '请输入正确的手机号',
         icon: 'none',
       })
       return
     }
-    if (!form.code || !isCodeAvailable(form.code)) {
+    if (!mobileForm.code || !isCodeAvailable(mobileForm.code)) {
       Taro.showToast({
         title: '请输入正确的验证码',
         icon: 'none',
       })
       return
     }
-    const res = await mobileLogin(form)
-    if (res.code === 0) {
-      Taro.setStorageSync('token', res.data.accessToken)
-      getLoginUserInfo()
-      Taro.showModal({
-        title: '登录成功',
-        success: () => {
+
+    setLoading(true)
+    Taro.showLoading({ title: '登录中...' })
+
+    try {
+      const res = await mobileLogin(mobileForm)
+      if (res.data.code === 0) {
+        Taro.setStorageSync('token', res.data.data.accessToken)
+        await getLoginUserInfo()
+
+        Taro.showToast({
+          title: '登录成功',
+          icon: 'success',
+        })
+
+        setTimeout(() => {
           Taro.switchTab({
             url: '/pages/index/index',
           })
-        },
-      })
-    } else {
+        }, 1500)
+      } else {
+        Taro.showToast({
+          title: res.data.msg || '登录失败',
+          icon: 'none',
+        })
+      }
+    } catch (error) {
+      console.error('手机号登录失败:', error)
       Taro.showToast({
-        title: res.msg,
+        title: '登录失败，请重试',
         icon: 'none',
       })
-      return
+    } finally {
+      setLoading(false)
+      Taro.hideLoading()
     }
-  }
-
-  const handleInputCode = e => {
-    setForm({ ...form, code: e.detail.value })
-  }
-
-  const handleInputPhone = e => {
-    setForm({ ...form, mobile: e.detail.value })
   }
 
   const handleAccountLogin = async () => {
@@ -135,24 +161,99 @@ const Login = () => {
       })
       return
     }
-    const res = await accountLogin(accountForm)
-    if (res.code === 0) {
-      Taro.setStorageSync('token', res.data.accessToken)
-      getLoginUserInfo()
-      Taro.showModal({
-        title: '登录成功',
-        success: () => {
+
+    setLoading(true)
+    Taro.showLoading({ title: '登录中...' })
+
+    try {
+      const res = await accountLogin(accountForm)
+      if (res.data.code === 0) {
+        Taro.setStorageSync('token', res.data.data.accessToken)
+        await getLoginUserInfo()
+
+        Taro.showToast({
+          title: '登录成功',
+          icon: 'success',
+        })
+
+        setTimeout(() => {
           Taro.switchTab({
             url: '/pages/index/index',
           })
-        },
-      })
-    } else {
+        }, 1500)
+      } else {
+        Taro.showToast({
+          title: res.data.msg || '登录失败',
+          icon: 'none',
+        })
+      }
+    } catch (error) {
+      console.error('账号登录失败:', error)
       Taro.showToast({
-        title: res.msg,
+        title: '登录失败，请重试',
         icon: 'none',
       })
+    } finally {
+      setLoading(false)
+      Taro.hideLoading()
     }
+  }
+
+  // 微信一键登录
+  const handleWechatLogin = async () => {
+    setLoading(true)
+    Taro.showLoading({ title: '微信登录中...' })
+
+    try {
+      // 获取微信登录code
+      const loginRes = await Taro.login()
+      if (loginRes.code) {
+        // 调用后端微信登录接口
+        const res = await wechatLogin(loginRes.code)
+        if (res.data.code === 0) {
+          Taro.setStorageSync('token', res.data.data.accessToken)
+          await getLoginUserInfo()
+
+          Taro.showToast({
+            title: '微信登录成功',
+            icon: 'success',
+          })
+
+          setTimeout(() => {
+            Taro.switchTab({
+              url: '/pages/index/index',
+            })
+          }, 1500)
+        } else {
+          Taro.showToast({
+            title: res.data.msg || '微信登录失败',
+            icon: 'none',
+          })
+        }
+      } else {
+        Taro.showToast({
+          title: '获取微信授权失败',
+          icon: 'none',
+        })
+      }
+    } catch (error) {
+      console.error('微信登录失败:', error)
+      Taro.showToast({
+        title: '微信登录失败，请重试',
+        icon: 'none',
+      })
+    } finally {
+      setLoading(false)
+      Taro.hideLoading()
+    }
+  }
+
+  const handleInputCode = e => {
+    setMobileForm({ ...mobileForm, code: e.detail.value })
+  }
+
+  const handleInputPhone = e => {
+    setMobileForm({ ...mobileForm, mobile: e.detail.value })
   }
 
   const handleInputUsername = e => {
@@ -161,6 +262,18 @@ const Login = () => {
 
   const handleInputPassword = e => {
     setAccountForm({ ...accountForm, password: e.detail.value })
+  }
+
+  // 修复发送验证码按钮的事件处理
+  const handleSendCode = () => {
+    if (loading) return
+    sendMobileCode()
+  }
+
+  // 修复微信登录按钮的事件处理
+  const handleWechatLoginClick = () => {
+    if (loading) return
+    handleWechatLogin()
   }
 
   return (
@@ -177,29 +290,35 @@ const Login = () => {
               type="text"
               placeholder="请输入手机号"
               value={mobileForm.mobile}
-              onInput={e => handleInputPhone(e)}
+              onInput={handleInputPhone}
+              disabled={loading}
             />
             <View className="code">
               <Input
                 className="password"
                 type="text"
-                password
                 placeholder="请输入验证码"
                 value={mobileForm.code}
-                onInput={e => handleInputCode(e)}
+                onInput={handleInputCode}
+                disabled={loading}
               />
               {!timer ? (
-                <Text className="btn" onClick={sendMobileCode} hidden={timer}>
+                <Button className="btn" onClick={handleSendCode} disabled={loading} size="mini">
                   获取验证码
-                </Text>
+                </Button>
               ) : (
-                <Text className="btn" hidden={!timer}>
+                <Button className="btn" disabled size="mini">
                   {count}秒后重发
-                </Text>
+                </Button>
               )}
             </View>
-            <Button className="button" onClick={handleLoginClick}>
-              登录
+            <Button
+              className="button"
+              onClick={handleMobileLogin}
+              disabled={loading}
+              loading={loading}
+            >
+              {loading ? '登录中...' : '登录'}
             </Button>
           </View>
         </AtTabsPane>
@@ -211,17 +330,24 @@ const Login = () => {
               type="text"
               placeholder="请输入用户名"
               value={accountForm.username}
-              onInput={e => handleInputUsername(e)}
+              onInput={handleInputUsername}
+              disabled={loading}
             />
             <Input
               className="input"
               type="password"
               placeholder="请输入密码"
               value={accountForm.password}
-              onInput={e => handleInputPassword(e)}
+              onInput={handleInputPassword}
+              disabled={loading}
             />
-            <Button className="button" onClick={handleAccountLogin}>
-              登录
+            <Button
+              className="button"
+              onClick={handleAccountLogin}
+              disabled={loading}
+              loading={loading}
+            >
+              {loading ? '登录中...' : '登录'}
             </Button>
           </View>
         </AtTabsPane>
@@ -232,7 +358,12 @@ const Login = () => {
           <Text>其他登录方式</Text>
         </View>
         <View className="options">
-          <Text className="icon icon-weixin">微信一键登录</Text>
+          <Text
+            className={`icon icon-weixin ${loading ? 'disabled' : ''}`}
+            onClick={handleWechatLoginClick}
+          >
+            微信一键登录
+          </Text>
         </View>
       </View>
       <View className="tips">登录/注册即视为同意《服务条款》和《隐私协议》</View>
