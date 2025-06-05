@@ -46,3 +46,11 @@ interface PageResult<T> {
   limit: number
   records: T[]
 }
+
+interface UserDeviceVO {
+  id: number
+  userId: number
+  type: number
+  groupName: string
+  devices: DeviceVO[]
+}

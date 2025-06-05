@@ -1,10 +1,10 @@
-import { Image, View, Text, RadioGroup, Label, Radio, Button, Input } from '@tarojs/components'
+import { View, Text, Button, Input, Image, RadioGroup, Radio, Label } from '@tarojs/components'
 import { useEffect, useState } from 'react'
-import { AtIcon, AtModal } from 'taro-ui'
+import { AtIcon, AtModal, AtInput, AtForm } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { setUserInfo } from '@/store/user'  // Add this import
-import { updateUser } from '@/service/user'
+import { setUserInfo } from '@/store/user'
+import { updateUser, uploadAvatar } from '@/service/user'
 import './index.scss'
 
 const UserInfo = () => {
@@ -15,7 +15,7 @@ const UserInfo = () => {
     id: userInfo.id,
     nickname: '',
     avatar: '',
-    gender: 0,
+    // 删除 gender 字段
   })
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const UserInfo = () => {
       ...myUserInfo,
       nickname: userInfo.nickname || '',
       avatar: userInfo.avatar || '',
-      gender: userInfo.gender || 0,
+      // 删除 gender 初始化
     })
   }, [userInfo])
 
@@ -32,6 +32,17 @@ const UserInfo = () => {
   const [isOpenUserName, setIsOpenUserName] = useState(false)
   // 管理弹窗内输入的昵称
   const [nickname, setNickname] = useState('')
+  // 上传状态
+  const [uploading, setUploading] = useState(false)
+
+  // 添加密码修改相关状态
+  const [isOpenPassword, setIsOpenPassword] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
+  const [passwordLoading, setPasswordLoading] = useState(false)
 
   // 点击昵称触发弹窗显示并填充当前昵称
   const onNickNameChange = () => {
@@ -42,46 +53,201 @@ const UserInfo = () => {
   // 关闭昵称修改弹窗
   const closePopup = () => setIsOpenUserName(false)
 
-  // 性别选择变化处理
-  const onGenderChange = e => {
-    setMyUserInfo(prev => ({ ...prev, gender: e.detail.value }))
+  // 添加密码修改相关函数
+  const onPasswordChange = () => {
+    setPasswordForm({
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    })
+    setIsOpenPassword(true)
+  }
+
+  const closePasswordPopup = () => {
+    setIsOpenPassword(false)
+    setPasswordForm({
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    })
+  }
+
+  const handlePasswordSubmit = async () => {
+    const { oldPassword, newPassword, confirmPassword } = passwordForm
+
+    // 表单验证
+    if (!oldPassword.trim()) {
+      Taro.showToast({
+        title: '请输入原密码',
+        icon: 'none',
+      })
+      return
+    }
+
+    if (!newPassword.trim()) {
+      Taro.showToast({
+        title: '请输入新密码',
+        icon: 'none',
+      })
+      return
+    }
+
+    if (newPassword.length < 6) {
+      Taro.showToast({
+        title: '新密码至少6位',
+        icon: 'none',
+      })
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      Taro.showToast({
+        title: '两次密码输入不一致',
+        icon: 'none',
+      })
+      return
+    }
+
+    if (oldPassword === newPassword) {
+      Taro.showToast({
+        title: '新密码不能与原密码相同',
+        icon: 'none',
+      })
+      return
+    }
+
+    try {
+      setPasswordLoading(true)
+      const response = await updateUser({
+        password: newPassword,
+      })
+
+      if (response.code === 0) {
+        Taro.showToast({
+          title: '密码修改成功',
+          icon: 'success',
+        })
+        setIsOpenPassword(false)
+        setPasswordForm({
+          oldPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        })
+      } else {
+        Taro.showToast({
+          title: response.msg || '密码修改失败',
+          icon: 'none',
+        })
+      }
+    } catch (error) {
+      console.error('密码修改失败:', error)
+      Taro.showToast({
+        title: '密码修改失败',
+        icon: 'none',
+      })
+    } finally {
+      setPasswordLoading(false)
+    }
   }
 
   // 获取Redux的dispatch
   const dispatch = useAppDispatch()
 
+  // 验证图片文件
+  // 检查文件类型 - 修复版
+  const validateImageFile = (file: any) => {
+    // 检查文件大小
+    if (file.size > 5 * 1024 * 1024) {
+      Taro.showToast({
+        title: '图片大小不能超过5MB',
+        icon: 'none',
+        duration: 2000,
+      })
+      return false
+    }
+
+    // 通过文件扩展名检查类型（更可靠）
+    const fileName = file.path || file.tempFilePath || ''
+    const fileExtension = fileName.toLowerCase().split('.').pop()
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif']
+
+    if (!allowedExtensions.includes(fileExtension)) {
+      Taro.showToast({
+        title: '只支持JPG、PNG、GIF格式图片',
+        icon: 'none',
+        duration: 2000,
+      })
+      return false
+    }
+
+    return true
+  }
+
   // 处理头像修改
   const onAvatarChange = () => {
+    if (uploading) {
+      Taro.showToast({
+        title: '正在上传中...',
+        icon: 'none',
+      })
+      return
+    }
+
     Taro.chooseMedia({
       count: 1,
       mediaType: ['image'],
-      success: res => {
-        const tempFilePath = res.tempFiles[0].tempFilePath
-        Taro.uploadFile({
-          url: 'http://localhost:8080/content/api/file/upload',
-          filePath: tempFilePath,
-          name: 'file',
-          header: {
-            Authorization: Taro.getStorageSync('token'),
-          },
-          success: fileRes => {
-            const url = JSON.parse(fileRes.data).data
-            setMyUserInfo(prev => ({ ...prev, avatar: url }))
-            dispatch(setUserInfo({ ...userInfo, avatar: url }))  // This line should now work
-            Taro.showToast({
-              title: '上传成功',
-              icon: 'success',
-              duration: 2000,
-            })
-          },
-          fail: err => {
-            console.log(err)
-            Taro.showToast({
-              title: '上传失败',
-              icon: 'none',
-              duration: 2000,
-            })
-          },
+      sourceType: ['album', 'camera'],
+      maxDuration: 30,
+      camera: 'back',
+      success: async res => {
+        const tempFile = res.tempFiles[0]
+
+        // 验证文件
+        if (!validateImageFile(tempFile)) {
+          return
+        }
+
+        setUploading(true)
+
+        // 显示上传进度
+        Taro.showLoading({
+          title: '上传中...',
+          mask: true,
+        })
+
+        try {
+          const avatarUrl = await uploadAvatar(tempFile.tempFilePath)
+
+          // 更新本地状态
+          setMyUserInfo(prev => ({ ...prev, avatar: avatarUrl }))
+
+          // 更新全局状态
+          dispatch(setUserInfo({ ...userInfo, avatar: avatarUrl }))
+
+          Taro.hideLoading()
+          Taro.showToast({
+            title: '头像上传成功',
+            icon: 'success',
+            duration: 2000,
+          })
+        } catch (error) {
+          console.error('头像上传失败:', error)
+          Taro.hideLoading()
+          Taro.showToast({
+            title: error.message || '头像上传失败',
+            icon: 'none',
+            duration: 2000,
+          })
+        } finally {
+          setUploading(false)
+        }
+      },
+      fail: error => {
+        console.error('选择图片失败:', error)
+        Taro.showToast({
+          title: '选择图片失败',
+          icon: 'none',
+          duration: 2000,
         })
       },
     })
@@ -92,29 +258,62 @@ const UserInfo = () => {
     if (!nickname.trim()) {
       Taro.showToast({
         title: '昵称不能为空',
-        icon: 'none'
+        icon: 'none',
       })
       return
     }
+
+    if (nickname.trim().length > 20) {
+      Taro.showToast({
+        title: '昵称不能超过20个字符',
+        icon: 'none',
+      })
+      return
+    }
+
     setMyUserInfo(prev => ({ ...prev, nickname: nickname.trim() }))
     setIsOpenUserName(false)
   }
 
   // 提交用户信息更新
   const handleSubmit = async () => {
+    if (!myUserInfo.nickname.trim()) {
+      Taro.showToast({
+        title: '昵称不能为空',
+        icon: 'none',
+      })
+      return
+    }
+
     try {
+      Taro.showLoading({
+        title: '保存中...',
+        mask: true,
+      })
+
       const res = await updateUser(myUserInfo)
+
+      Taro.hideLoading()
+
       if (res.code === 0) {
         Taro.showToast({ title: '修改成功' })
-        dispatch(setUserInfo(res.data)) // 更新全局用户信息
+        dispatch(setUserInfo({ ...userInfo, ...myUserInfo })) // 更新全局用户信息
         setTimeout(() => {
           Taro.navigateBack({ delta: 1 }) // 返回上一页
         }, 1000)
       } else {
-        Taro.showToast({ title: '修改失败' })
+        Taro.showToast({
+          title: res.msg || '修改失败',
+          icon: 'none',
+        })
       }
     } catch (error) {
-      Taro.showToast({ title: '修改时出错' })
+      Taro.hideLoading()
+      console.error('更新用户信息失败:', error)
+      Taro.showToast({
+        title: '修改时出错',
+        icon: 'none',
+      })
     }
   }
 
@@ -124,9 +323,17 @@ const UserInfo = () => {
         <View className="avatar">
           <View className="row">
             <View className="left">头像</View>
-            <View className="right" onClick={onAvatarChange}>
+            <View className={`right ${uploading ? 'uploading' : ''}`} onClick={onAvatarChange}>
               <View className="img">
-                <Image src={myUserInfo.avatar} mode="aspectFill" />
+                <Image
+                  src={myUserInfo.avatar || '/assets/images/default-avatar.png'}
+                  mode="aspectFill"
+                />
+                {uploading && (
+                  <View className="upload-mask">
+                    <View className="loading">上传中...</View>
+                  </View>
+                )}
               </View>
               <View className="icon">
                 <AtIcon value="chevron-right" size="20" color="#b9b9b9" />
@@ -139,24 +346,19 @@ const UserInfo = () => {
           <View className="row">
             <View className="left">昵称</View>
             <View className="right" onClick={onNickNameChange}>
-              <Text className="txt">{myUserInfo.nickname}</Text>
+              <Text className="txt">{myUserInfo.nickname || '未设置'}</Text>
               <AtIcon value="chevron-right" size="20" color="#b9b9b9" />
             </View>
           </View>
         </View>
 
-        <View className="gender">
+        {/* 添加修改密码选项 */}
+        <View className="password">
           <View className="row">
-            <View className="left">性别</View>
-            <View className="right">
-              <RadioGroup onChange={onGenderChange}>
-                <Label className="radio">
-                  <Radio value="0" color="#1296db" checked={myUserInfo.gender === 0} />男
-                </Label>
-                <Label className="radio">
-                  <Radio value="1" color="#1296db" checked={myUserInfo.gender === 1} />女
-                </Label>
-              </RadioGroup>
+            <View className="left">修改密码</View>
+            <View className="right" onClick={onPasswordChange}>
+              <Text className="txt">点击修改</Text>
+              <AtIcon value="chevron-right" size="20" color="#b9b9b9" />
             </View>
           </View>
         </View>
@@ -182,12 +384,68 @@ const UserInfo = () => {
               placeholder="请输入昵称"
               value={nickname}
               maxlength={20}
-              onInput={e => setNickname(e.detail.value)}  // 将 onChange 改为 onInput
+              onInput={e => setNickname(e.detail.value)}
             />
           </View>
           <View className="footer">
             <Button className="submit-btn" onClick={submitNickName} size="mini">
               确认修改昵称
+            </Button>
+          </View>
+        </View>
+      </AtModal>
+
+      {/* 添加密码修改弹窗 */}
+      <AtModal className="passwordPopup" isOpened={isOpenPassword}>
+        <View className="container">
+          <View className="popHeader">
+            <View className="title">修改密码</View>
+            <View className="close" onClick={closePasswordPopup}>
+              <AtIcon value="close" size={20} color="#999" />
+            </View>
+          </View>
+          <View className="content">
+            <AtForm>
+              <AtInput
+                name="oldPassword"
+                title="原密码"
+                type="password"
+                placeholder="请输入原密码"
+                value={passwordForm.oldPassword}
+                onChange={value =>
+                  setPasswordForm(prev => ({ ...prev, oldPassword: value as string }))
+                }
+              />
+              <AtInput
+                name="newPassword"
+                title="新密码"
+                type="password"
+                placeholder="请输入新密码（至少6位）"
+                value={passwordForm.newPassword}
+                onChange={value =>
+                  setPasswordForm(prev => ({ ...prev, newPassword: value as string }))
+                }
+              />
+              <AtInput
+                name="confirmPassword"
+                title="确认新密码"
+                type="password"
+                placeholder="请再次输入新密码"
+                value={passwordForm.confirmPassword}
+                onChange={value =>
+                  setPasswordForm(prev => ({ ...prev, confirmPassword: value as string }))
+                }
+              />
+            </AtForm>
+          </View>
+          <View className="footer">
+            <Button
+              className="submit-btn"
+              onClick={handlePasswordSubmit}
+              size="mini"
+              loading={passwordLoading}
+            >
+              确认修改密码
             </Button>
           </View>
         </View>

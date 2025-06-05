@@ -1,10 +1,11 @@
 export default defineAppConfig({
   pages: [
     'pages/index/index',
-    'pages/my/index',
     'pages/login/index',
-    'pages/device/index',
+    'pages/my/index',
+    'pages/my/password/index', // 添加修改密码页面
     'pages/notice/index',
+    'pages/pageUser/userInfo/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -24,13 +25,6 @@ export default defineAppConfig({
         pagePath: 'pages/index/index',
         iconPath: 'static/tabs/home.png',
         selectedIconPath: 'static/tabs/home_selected.png',
-      },
-
-      {
-        text: '设备',
-        pagePath: 'pages/device/index',
-        iconPath: 'static/tabs/device.png',
-        selectedIconPath: 'static/tabs/device_selected.png',
       },
       {
         text: '公告',

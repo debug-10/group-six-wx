@@ -1,14 +1,100 @@
-.page {
+page {
   background: #f5f5f5;
- }
- .my {
+}
+
+.my {
+  min-height: 100vh;
   padding: 20rpx;
-  .avatar {
-  width: 180rpx;
-  height: 180rpx;
-  border-radius: 100%;
+
+  .login-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+
+    .login-avatar {
+      width: 120rpx;
+      height: 120rpx;
+      border-radius: 50%;
+      margin-bottom: 30rpx;
+    }
+
+    .login-text {
+      font-size: 28rpx;
+      color: #666;
+      margin-bottom: 40rpx;
+    }
+
+    .login-btn {
+      width: 300rpx;
+    }
   }
- }
+
+  .user-card {
+    background: white;
+    border-radius: 20rpx;
+    padding: 40rpx 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+
+    .user-header {
+      display: flex;
+      align-items: center;
+
+      .avatar {
+        width: 120rpx;
+        height: 120rpx;
+        border-radius: 50%;
+        border: 4rpx solid #e0e0e0;
+        margin-right: 30rpx;
+      }
+
+      .user-info {
+        flex: 1;
+
+        .nickname {
+          display: block;
+          font-size: 36rpx;
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 15rpx;
+        }
+
+        .username,
+        .mobile,
+        .role {
+          display: block;
+          font-size: 24rpx;
+          color: #666;
+          margin-bottom: 8rpx;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+
+  .menu-list {
+    margin-bottom: 40rpx;
+    border-radius: 20rpx;
+    overflow: hidden;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  }
+
+  .logout-section {
+    margin-top: 60rpx;
+
+    .logout-btn {
+      border-radius: 20rpx;
+      background-color: #ff4757 !important;
+      border-color: #ff4757 !important;
+
+      &:active {
+        background-color: #ff3742 !important;
+      }
+    }
+  }
+}
 
 .logout-btn {
   margin-top: 30px;
