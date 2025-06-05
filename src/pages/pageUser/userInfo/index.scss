@@ -1,20 +1,21 @@
 .userInfoPage {
-  padding: 20px;
-  background-color: #f5f5f5;
+  padding: 24px;
+  background-color: #f8f9fa;
   min-height: 100vh;
 
   .user-info {
     background-color: white;
-    border-radius: 10px;
+    border-radius: 16px;
     overflow: hidden;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 
-    .avatar, .nickname, .gender {
+    .avatar, .nickname, .password {
       .row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px;
+        padding: 24px 20px;
         border-bottom: 1px solid #f0f0f0;
 
         &:last-child {
@@ -22,7 +23,8 @@
         }
 
         .left {
-          font-size: 16px;
+          font-size: 18px;
+          font-weight: 600;
           color: #333;
         }
 
@@ -30,6 +32,11 @@
           display: flex;
           align-items: center;
           cursor: pointer;
+          transition: opacity 0.3s ease;
+
+          &:hover {
+            opacity: 0.8;
+          }
 
           &.uploading {
             pointer-events: none;
@@ -38,12 +45,17 @@
 
           .img {
             position: relative;
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             overflow: hidden;
-            margin-right: 10px;
-            border: 2px solid #f0f0f0;
+            margin-right: 12px;
+            border: 3px solid #e9ecef;
+            transition: border-color 0.3s ease;
+
+            &:hover {
+              border-color: #1296db;
+            }
 
             image {
               width: 100%;
@@ -56,7 +68,7 @@
               left: 0;
               right: 0;
               bottom: 0;
-              background-color: rgba(0, 0, 0, 0.5);
+              background-color: rgba(0, 0, 0, 0.6);
               display: flex;
               align-items: center;
               justify-content: center;
@@ -64,26 +76,28 @@
 
               .loading {
                 color: white;
-                font-size: 12px;
+                font-size: 14px;
+                font-weight: 500;
               }
             }
           }
 
           .txt {
-            font-size: 14px;
+            font-size: 16px;
             color: #666;
-            margin-right: 10px;
+            margin-right: 12px;
             max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-weight: 500;
           }
 
           .radio {
             margin-right: 20px;
             display: flex;
             align-items: center;
-            font-size: 14px;
+            font-size: 16px;
             color: #666;
 
             radio {
@@ -96,51 +110,75 @@
   }
 
   .button {
-    background-color: #1296db;
+    background: linear-gradient(135deg, #1296db 0%, #0e7bb8 100%);
     color: white;
     border-radius: 25px;
-    height: 50px;
-    line-height: 50px;
-    font-size: 16px;
+    height: 56px;
+    line-height: 56px;
+    font-size: 18px;
+    font-weight: 600;
     border: none;
+    box-shadow: 0 4px 12px rgba(18, 150, 219, 0.3);
+    transition: all 0.3s ease;
 
     &:active {
-      background-color: #0e7bb8;
+      background: linear-gradient(135deg, #0e7bb8 0%, #0a5d8a 100%);
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(18, 150, 219, 0.4);
     }
   }
 }
 
+// 昵称修改弹窗样式优化
 .nickNamePopup {
   .container {
-    padding: 20px;
+    padding: 28px;
+    border-radius: 16px;
 
     .popHeader {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
 
       .title {
-        font-size: 18px;
-        font-weight: bold;
+        font-size: 20px;
+        font-weight: 700;
         color: #333;
       }
 
       .close {
         cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background-color: #f8f9fa;
+        }
       }
     }
 
     .content {
-      margin-bottom: 20px;
+      margin-bottom: 28px;
 
       .input {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 14px;
+        padding: 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 16px;
         box-sizing: border-box;
+        transition: border-color 0.3s ease;
+        background-color: #fafbfc;
+
+        &:focus {
+          border-color: #1296db;
+          background-color: white;
+          outline: none;
+        }
       }
     }
 
@@ -148,15 +186,131 @@
       text-align: center;
 
       .submit-btn {
-        background-color: #1296db;
+        background: linear-gradient(135deg, #1296db 0%, #0e7bb8 100%);
         color: white;
-        border-radius: 20px;
-        padding: 10px 30px;
+        border-radius: 25px;
+        padding: 14px 40px;
         border: none;
-        font-size: 14px;
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(18, 150, 219, 0.3);
+        transition: all 0.3s ease;
 
         &:active {
-          background-color: #0e7bb8;
+          background: linear-gradient(135deg, #0e7bb8 0%, #0a5d8a 100%);
+          transform: translateY(1px);
+        }
+      }
+    }
+  }
+}
+
+// 密码修改弹窗样式优化
+.passwordPopup {
+  .container {
+    padding: 28px;
+    border-radius: 16px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+
+    .popHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .close {
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background-color: #f8f9fa;
+        }
+      }
+    }
+
+    .content {
+      margin-bottom: 28px;
+
+      // 重写AtInput样式
+      .at-input {
+        margin-bottom: 20px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #e9ecef;
+        background-color: #fafbfc;
+        transition: all 0.3s ease;
+
+        &:focus-within {
+          border-color: #1296db;
+          background-color: white;
+          box-shadow: 0 0 0 3px rgba(18, 150, 219, 0.1);
+        }
+
+        .at-input__title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #495057;
+          padding: 16px 16px 8px 16px;
+          margin-bottom: 0;
+        }
+
+        .at-input__input {
+          padding: 8px 16px 16px 16px;
+          font-size: 16px;
+          border: none;
+          background: transparent;
+
+          input {
+            font-size: 16px;
+            color: #333;
+
+            &::placeholder {
+              color: #adb5bd;
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+
+      .submit-btn {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border-radius: 25px;
+        padding: 14px 40px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        transition: all 0.3s ease;
+        min-width: 160px;
+
+        &:active {
+          background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+          transform: translateY(1px);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
         }
       }
     }

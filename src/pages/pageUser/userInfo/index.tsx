@@ -37,8 +37,8 @@ const UserInfo = () => {
 
   // 添加密码修改相关状态
   const [isOpenPassword, setIsOpenPassword] = useState(false)
+  // 简化密码表单状态，移除 oldPassword
   const [passwordForm, setPasswordForm] = useState({
-    oldPassword: '',
     newPassword: '',
     confirmPassword: '',
   })
@@ -63,30 +63,23 @@ const UserInfo = () => {
     setIsOpenPassword(true)
   }
 
+  // 关闭密码弹窗时也要清空表单
   const closePasswordPopup = () => {
     setIsOpenPassword(false)
     setPasswordForm({
-      oldPassword: '',
       newPassword: '',
       confirmPassword: '',
     })
   }
 
-  const handlePasswordSubmit = async () => {
-    const { oldPassword, newPassword, confirmPassword } = passwordForm
-
-    // 表单验证
-    if (!oldPassword.trim()) {
-      Taro.showToast({
-        title: '请输入原密码',
-        icon: 'none',
-      })
-      return
-    }
+  // 处理密码修改确认
+  // 处理密码修改确认
+  const handlePasswordConfirm = async () => {
+    const { newPassword, confirmPassword } = passwordForm
 
     if (!newPassword.trim()) {
       Taro.showToast({
-        title: '请输入新密码',
+        title: '新密码不能为空',
         icon: 'none',
       })
       return
@@ -94,7 +87,7 @@ const UserInfo = () => {
 
     if (newPassword.length < 6) {
       Taro.showToast({
-        title: '新密码至少6位',
+        title: '密码至少6位',
         icon: 'none',
       })
       return
@@ -107,54 +100,25 @@ const UserInfo = () => {
       })
       return
     }
+    // 验证通过，将新密码设置到用户信息中
+    setMyUserInfo(prev => ({ ...prev, password: newPassword }))
 
-    if (oldPassword === newPassword) {
-      Taro.showToast({
-        title: '新密码不能与原密码相同',
-        icon: 'none',
-      })
-      return
-    }
+    // 关闭弹窗并清空表单
+    setIsOpenPassword(false)
+    setPasswordForm({
+      newPassword: '',
+      confirmPassword: '',
+    })
 
-    try {
-      setPasswordLoading(true)
-      const response = await updateUser({
-        password: newPassword,
-      })
-
-      if (response.code === 0) {
-        Taro.showToast({
-          title: '密码修改成功',
-          icon: 'success',
-        })
-        setIsOpenPassword(false)
-        setPasswordForm({
-          oldPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        })
-      } else {
-        Taro.showToast({
-          title: response.msg || '密码修改失败',
-          icon: 'none',
-        })
-      }
-    } catch (error) {
-      console.error('密码修改失败:', error)
-      Taro.showToast({
-        title: '密码修改失败',
-        icon: 'none',
-      })
-    } finally {
-      setPasswordLoading(false)
-    }
+    Taro.showToast({
+      title: '密码已设置，请点击保存',
+      icon: 'success',
+    })
   }
 
   // 获取Redux的dispatch
   const dispatch = useAppDispatch()
 
-  // 验证图片文件
-  // 检查文件类型 - 修复版
   const validateImageFile = (file: any) => {
     // 检查文件大小
     if (file.size > 5 * 1024 * 1024) {
@@ -277,6 +241,9 @@ const UserInfo = () => {
 
   // 提交用户信息更新
   const handleSubmit = async () => {
+    console.log('=== 开始提交用户信息 ===')
+    console.log('当前用户信息:', myUserInfo)
+
     if (!myUserInfo.nickname.trim()) {
       Taro.showToast({
         title: '昵称不能为空',
@@ -291,19 +258,39 @@ const UserInfo = () => {
         mask: true,
       })
 
-      const res = await updateUser(myUserInfo)
+      // 构建更新数据
+      const updateData: any = {
+        nickname: myUserInfo.nickname,
+      }
+
+      // 如果有头像变更，也一起更新
+      if (myUserInfo.avatar) {
+        updateData.avatar = myUserInfo.avatar
+      }
+      if (myUserInfo.password) {
+        updateData.password = myUserInfo.password
+      }
+
+      console.log('提交的数据:', updateData)
+
+      const res = await updateUser(updateData)
+
+      console.log('API响应:', res)
 
       Taro.hideLoading()
 
-      if (res.code === 0) {
+      if (res.data && res.data.code === 0) {
         Taro.showToast({ title: '修改成功' })
+        // 清除本地密码缓存
+        setMyUserInfo(prev => ({ ...prev, password: undefined }))
         dispatch(setUserInfo({ ...userInfo, ...myUserInfo })) // 更新全局用户信息
         setTimeout(() => {
           Taro.navigateBack({ delta: 1 }) // 返回上一页
         }, 1000)
       } else {
+        console.error('API返回错误:', res)
         Taro.showToast({
-          title: res.msg || '修改失败',
+          title: (res.data && res.data.msg) || '修改失败',
           icon: 'none',
         })
       }
@@ -395,7 +382,7 @@ const UserInfo = () => {
         </View>
       </AtModal>
 
-      {/* 添加密码修改弹窗 */}
+      {/* 简化的密码修改弹窗 */}
       <AtModal className="passwordPopup" isOpened={isOpenPassword}>
         <View className="container">
           <View className="popHeader">
@@ -406,16 +393,6 @@ const UserInfo = () => {
           </View>
           <View className="content">
             <AtForm>
-              <AtInput
-                name="oldPassword"
-                title="原密码"
-                type="password"
-                placeholder="请输入原密码"
-                value={passwordForm.oldPassword}
-                onChange={value =>
-                  setPasswordForm(prev => ({ ...prev, oldPassword: value as string }))
-                }
-              />
               <AtInput
                 name="newPassword"
                 title="新密码"
@@ -439,13 +416,8 @@ const UserInfo = () => {
             </AtForm>
           </View>
           <View className="footer">
-            <Button
-              className="submit-btn"
-              onClick={handlePasswordSubmit}
-              size="mini"
-              loading={passwordLoading}
-            >
-              确认修改密码
+            <Button className="submit-btn" onClick={handlePasswordConfirm} size="mini">
+              确认
             </Button>
           </View>
         </View>
