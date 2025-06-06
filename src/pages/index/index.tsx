@@ -1,4 +1,5 @@
 import { View, Text, Button } from '@tarojs/components'
+import React from 'react'
 import { useEffect, useState } from 'react'
 import {
   AtCard,
@@ -12,14 +13,15 @@ import {
 } from 'taro-ui'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { getUserDevices, addDeviceToUser } from '@/service/device'
+import { getLatestNews } from '@/service/news'
 import './index.scss'
 
 // 场景类型映射
 const SceneTypeMap = {
-  1: { name: '温湿度', icon: 'lightning' },
-  2: { name: '智能灯', icon: 'alert-circle' },
-  3: { name: '风扇', icon: 'refresh' },
-  4: { name: '门铃', icon: 'bell' },
+  1: { name: '智能夜灯', icon: 'lightning' },
+  2: { name: '智能火警', icon: 'alert-circle' },
+  3: { name: '智能风扇', icon: 'refresh' },
+  4: { name: '智能门铃', icon: 'bell' },
 }
 
 // 设备状态映射
@@ -35,6 +37,10 @@ const Index: React.FC = () => {
   const [deviceMac, setDeviceMac] = useState('')
   const [addLoading, setAddLoading] = useState(false)
   const [hasToken, setHasToken] = useState(false)
+
+  // 新增公告相关状态
+  const [latestNews, setLatestNews] = useState<NewsVO | null>(null)
+  const [newsLoading, setNewsLoading] = useState(false)
 
   // 检查登录状态
   const checkLoginStatus = () => {
@@ -145,24 +151,51 @@ const Index: React.FC = () => {
     }
   }
 
-  // 组件挂载时检查登录状态
+  // 新增获取最新公告的函数
+  const fetchLatestNews = async () => {
+    setNewsLoading(true)
+    try {
+      const res = await getLatestNews()
+      if (res.statusCode === 200) {
+        const { code, data } = res.data
+        if (code === 0 && data && data.length > 0) {
+          // 获取最新的公告（第一条）
+          setLatestNews(data[0])
+        } else {
+          setLatestNews(null)
+        }
+      }
+    } catch (error) {
+      console.error('获取公告失败:', error)
+      // 静默失败，不显示错误提示
+    } finally {
+      setNewsLoading(false)
+    }
+  }
+
+  // 组件挂载时检查登录状态并获取公告
   useEffect(() => {
     const token = checkLoginStatus()
     setHasToken(token)
+
+    // 获取最新公告（无论是否登录都显示）
+    fetchLatestNews()
+
     if (token) {
-      // 延迟一下确保token完全生效
       setTimeout(() => {
         fetchUserDevices()
       }, 100)
     }
   }, [])
 
-  // 页面显示时刷新数据（避免重复调用）
+  // 页面显示时刷新数据
   useDidShow(() => {
     const token = checkLoginStatus()
     setHasToken(token)
 
-    // 只有当token状态发生变化时才重新获取数据
+    // 刷新公告
+    fetchLatestNews()
+
     if (token && !hasToken) {
       setTimeout(() => {
         fetchUserDevices()
@@ -182,10 +215,16 @@ const Index: React.FC = () => {
         </View>
       </View>
 
-      {/* 系统公告 */}
+      {/* 系统公告 - 修改为动态获取 */}
       <View className="notice">
         <Text className="notice-icon">【公告】</Text>
-        <Text className="notice-text">系统将于今晚23:00-24:00维护</Text>
+        {newsLoading ? (
+          <Text className="notice-text">加载中...</Text>
+        ) : latestNews ? (
+          <Text className="notice-text">{latestNews.title}</Text>
+        ) : (
+          <Text className="notice-text">暂无公告</Text>
+        )}
       </View>
 
       {/* 用户设备列表 - 场景卡片显示 */}
