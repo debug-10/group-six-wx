@@ -18,10 +18,10 @@ import './index.scss'
 
 // 场景类型映射
 const SceneTypeMap = {
-  1: { name: '温湿度', icon: 'lightning' },
-  2: { name: '智能灯', icon: 'alert-circle' },
-  3: { name: '风扇', icon: 'refresh' },
-  4: { name: '门铃', icon: 'bell' },
+  1: { name: '智能夜灯', icon: 'lightning' },
+  2: { name: '智能火警', icon: 'alert-circle' },
+  3: { name: '智能风扇', icon: 'refresh' },
+  4: { name: '智能门铃', icon: 'bell' },
 }
 
 // 设备状态映射
