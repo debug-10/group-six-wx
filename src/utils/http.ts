@@ -15,7 +15,7 @@ interface RequestResponse<T = any> {
 }
 
 // 基础URL配置 - 更新为你的后端网关地址
-const BASE_URL = 'http://localhost:8080/user' // 开发环境
+const BASE_URL = 'http://10.20.74.2:8080' // 开发环境
 // const BASE_URL = 'http://121.4.51.19:8080' // 生产环境
 
 type Data<T> = {
