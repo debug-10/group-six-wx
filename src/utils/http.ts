@@ -16,6 +16,7 @@ interface RequestResponse<T = any> {
 
 // 基础URL配置 - 更新为你的后端网关地址
 const BASE_URL = 'http://10.20.74.2:8080' // 开发环境
+const BASE_URL = 'http://localhost:8080' // 开发环境
 // const BASE_URL = 'http://121.4.51.19:8080' // 生产环境
 
 type Data<T> = {
@@ -82,3 +83,40 @@ const httpInterceptor = function (chain) {
 }
 
 Taro.addInterceptor(httpInterceptor)
+
+// 文件上传接口
+export const uploadFile = <T>(config: {
+  url: string
+  filePath: string
+  name?: string
+  formData?: Record<string, any>
+  header?: Record<string, string>
+}): Promise<Data<T>> => {
+  return new Promise((resolve, reject) => {
+    Taro.uploadFile({
+      url: `${BASE_URL}${config.url}`,
+      filePath: config.filePath,
+      name: config.name || 'file',
+      formData: config.formData,
+      header: {
+        Authorization: Taro.getStorageSync('token'),
+        ...config.header,
+      },
+      success: res => {
+        try {
+          const result = JSON.parse(res.data)
+          if (result.code === 0) {
+            resolve(result)
+          } else {
+            reject(new Error(result.msg || '上传失败'))
+          }
+        } catch (error) {
+          reject(new Error('响应解析失败'))
+        }
+      },
+      fail: error => {
+        reject(error)
+      },
+    })
+  })
+}

@@ -1,16 +1,25 @@
-import { View, Text } from '@tarojs/components'
+import { View, Text, Button } from '@tarojs/components'
 import { useEffect, useState } from 'react'
-import { AtCard, AtIcon, AtMessage } from 'taro-ui'
-import Taro from '@tarojs/taro'
-import { getDevicePage } from '@/service/device'
+import {
+  AtCard,
+  AtIcon,
+  AtMessage,
+  AtModal,
+  AtModalHeader,
+  AtModalContent,
+  AtModalAction,
+  AtInput,
+} from 'taro-ui'
+import Taro, { useDidShow } from '@tarojs/taro'
+import { getUserDevices, addDeviceToUser } from '@/service/device'
 import './index.scss'
 
-// 设备类型映射
-const DeviceTypeMap = {
-  1: { name: '智能灯', icon: 'lightning' },
-  2: { name: '温湿度传感器', icon: 'analytics' },
-  3: { name: '蜂鸣器', icon: 'volume-plus' },
-  4: { name: '红外传感器', icon: 'eye' },
+// 场景类型映射
+const SceneTypeMap = {
+  1: { name: '温湿度', icon: 'lightning' },
+  2: { name: '智能灯', icon: 'alert-circle' },
+  3: { name: '风扇', icon: 'refresh' },
+  4: { name: '门铃', icon: 'bell' },
 }
 
 // 设备状态映射
@@ -20,38 +29,57 @@ const DeviceStatusMap = {
 }
 
 const Index: React.FC = () => {
-  const [devices, setDevices] = useState<DeviceVO[]>([])
+  const [userDevices, setUserDevices] = useState<UserDeviceVO[]>([])
   const [loading, setLoading] = useState(false)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-  })
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [deviceMac, setDeviceMac] = useState('')
+  const [addLoading, setAddLoading] = useState(false)
+  const [hasToken, setHasToken] = useState(false)
 
-  // 获取设备列表
-  const fetchDevices = async () => {
+  // 检查登录状态
+  const checkLoginStatus = () => {
+    const token = Taro.getStorageSync('token')
+    return !!token
+  }
+
+  // 获取场景整体状态（如果有任何设备离线，整个场景就是离线）
+  const getSceneStatus = (devices: any[]) => {
+    if (!devices || devices.length === 0) return 0
+    // 如果有任何一个设备离线（状态为0），整个场景就是离线
+    const hasOfflineDevice = devices.some(device => device.status === 0)
+    return hasOfflineDevice ? 0 : 1
+  }
+
+  // 获取用户设备列表
+  const fetchUserDevices = async () => {
+    // 检查是否有token
+    if (!checkLoginStatus()) {
+      console.log('用户未登录，跳过获取设备列表')
+      return
+    }
+
     setLoading(true)
     try {
-      const res = await getDevicePage({
-        page: pagination.page,
-        limit: pagination.limit,
-      })
+      console.log('开始获取用户设备列表')
+      const res = await getUserDevices()
+      console.log('API响应:', res)
 
       if (res.statusCode === 200) {
         const { code, msg, data } = res.data
+        console.log('响应数据:', { code, msg, data })
+
         if (code === 0 && data) {
-          setDevices(data.records || [])
-          setPagination(prev => ({
-            ...prev,
-            total: data.total,
-          }))
+          setUserDevices(data)
+          console.log('设备列表更新成功:', data)
         } else {
+          console.log('获取设备失败:', msg)
           Taro.atMessage({
-            message: msg || '获取设备列表失败',
+            message: msg || '获取设备失败',
             type: 'error',
           })
         }
       } else {
+        console.log('HTTP状态码错误:', res.statusCode)
         Taro.atMessage({
           message: '网络请求失败，请稍后重试',
           type: 'error',
@@ -68,55 +96,166 @@ const Index: React.FC = () => {
     }
   }
 
+  // 添加设备
+  const handleAddDevice = async () => {
+    if (!deviceMac.trim()) {
+      Taro.atMessage({
+        message: '请输入设备MAC地址',
+        type: 'warning',
+      })
+      return
+    }
+
+    setAddLoading(true)
+    try {
+      const res = await addDeviceToUser({
+        deviceMac: deviceMac.trim(),
+      })
+      if (res.statusCode === 200) {
+        const { code, msg } = res.data
+        if (code === 0) {
+          Taro.atMessage({
+            message: '设备添加成功',
+            type: 'success',
+          })
+          setShowAddModal(false)
+          setDeviceMac('')
+          // 重新获取设备列表
+          fetchUserDevices()
+        } else {
+          Taro.atMessage({
+            message: msg || '设备添加失败',
+            type: 'error',
+          })
+        }
+      } else {
+        Taro.atMessage({
+          message: '网络请求失败，请稍后重试',
+          type: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('添加设备失败:', error)
+      Taro.atMessage({
+        message: '添加设备失败，请稍后重试',
+        type: 'error',
+      })
+    } finally {
+      setAddLoading(false)
+    }
+  }
+
+  // 组件挂载时检查登录状态
   useEffect(() => {
-    fetchDevices()
-  }, [pagination.page, pagination.limit])
+    const token = checkLoginStatus()
+    setHasToken(token)
+    if (token) {
+      // 延迟一下确保token完全生效
+      setTimeout(() => {
+        fetchUserDevices()
+      }, 100)
+    }
+  }, [])
+
+  // 页面显示时刷新数据（避免重复调用）
+  useDidShow(() => {
+    const token = checkLoginStatus()
+    setHasToken(token)
+
+    // 只有当token状态发生变化时才重新获取数据
+    if (token && !hasToken) {
+      setTimeout(() => {
+        fetchUserDevices()
+      }, 100)
+    }
+  })
 
   return (
     <View className="index">
       <AtMessage />
+
+      {/* 头部标题和添加按钮 */}
+      <View className="header">
+        <Text className="title">我的设备</Text>
+        <View className="add-btn" onClick={() => setShowAddModal(true)}>
+          <AtIcon value="add" size="24" color="#007aff" />
+        </View>
+      </View>
+
       {/* 系统公告 */}
       <View className="notice">
         <Text className="notice-icon">【公告】</Text>
         <Text className="notice-text">系统将于今晚23:00-24:00维护</Text>
       </View>
 
-      {/* 设备列表 */}
+      {/* 用户设备列表 - 场景卡片显示 */}
       <View className="device-list">
-        {loading ? (
+        {!hasToken ? (
+          <View className="empty">
+            <Text>请先登录后查看设备</Text>
+          </View>
+        ) : loading ? (
           <View className="loading">加载中...</View>
-        ) : devices.length === 0 ? (
-          <View className="empty">暂无设备</View>
+        ) : userDevices.length === 0 ? (
+          <View className="empty">
+            <Text>暂无设备，点击右上角+号添加设备</Text>
+          </View>
         ) : (
-          devices.map(device => (
-            <View key={device.id} className="device-card">
-              <AtCard
-                title={device.name}
-                className={`device-type-${device.type}`}
-                extra={device.location}
-              >
-                <View className="device-info">
-                  <View className="device-status">
-                    <Text className={`status-dot status-${device.status}`} />
-                    <Text className="status-text">{DeviceStatusMap[device.status].text}</Text>
+          <View className="scene-grid">
+            {userDevices.map(userDevice => {
+              const sceneStatus = getSceneStatus(userDevice.devices)
+              return (
+                <View key={userDevice.id} className="scene-card">
+                  {/* 场景标题 */}
+                  <View className="scene-title">
+                    <Text className="title-text">
+                      {SceneTypeMap[userDevice.type]?.name || '未知场景'}
+                    </Text>
                   </View>
-                  <View className="device-type">
-                    <AtIcon value={DeviceTypeMap[device.type].icon} size="16" />
-                    <Text className="type-text">{DeviceTypeMap[device.type].name}</Text>
-                  </View>
-                  {device.type === 2 && (
-                    <View className="device-data">
-                      <Text className="data-item">温度: {device.temperature}°C</Text>
-                      <Text className="data-item">湿度: {device.humidity}%</Text>
+
+                  {/* 场景状态 */}
+                  <View className="scene-status">
+                    <View className="status-info">
+                      <Text className={`status-dot status-${sceneStatus}`} />
+                      <Text className="status-text">
+                        {DeviceStatusMap[sceneStatus]?.text || '未知'}
+                      </Text>
                     </View>
-                  )}
-                  <Text className="device-mac">MAC: {device.deviceMac}</Text>
+                  </View>
+
+                  {/* 右箭头 */}
+                  <View className="arrow">
+                    <AtIcon value="chevron-right" size="16" color="#ccc" />
+                  </View>
                 </View>
-              </AtCard>
-            </View>
-          ))
+              )
+            })}
+          </View>
         )}
       </View>
+
+      {/* 添加设备弹窗 */}
+      <AtModal isOpened={showAddModal} onClose={() => setShowAddModal(false)}>
+        <AtModalHeader>添加设备</AtModalHeader>
+        <AtModalContent>
+          <View className="add-device-form">
+            <AtInput
+              name="deviceMac"
+              title="设备MAC"
+              type="text"
+              placeholder="请输入设备MAC地址"
+              value={deviceMac}
+              onChange={value => setDeviceMac(value as string)}
+            />
+          </View>
+        </AtModalContent>
+        <AtModalAction>
+          <Button onClick={() => setShowAddModal(false)}>取消</Button>
+          <Button type="primary" onClick={handleAddDevice} loading={addLoading}>
+            添加
+          </Button>
+        </AtModalAction>
+      </AtModal>
     </View>
   )
 }

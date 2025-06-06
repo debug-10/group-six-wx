@@ -1,0 +1,26 @@
+page {
+  background: #f5f5f5;
+}
+
+.change-password {
+  min-height: 100vh;
+  padding: 20rpx;
+
+  .form-section {
+    background: white;
+    border-radius: 20rpx;
+    margin-bottom: 40rpx;
+    overflow: hidden;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  }
+
+  .submit-section {
+    padding: 0 20rpx;
+
+    .submit-btn {
+      border-radius: 20rpx;
+      height: 90rpx;
+      line-height: 90rpx;
+    }
+  }
+}

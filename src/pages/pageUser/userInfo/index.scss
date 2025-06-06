@@ -1,123 +1,317 @@
-page {
-  height: 100%;
-  background: #f5f5f5;
+.userInfoPage {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 
-  .userInfoPage {
-    padding: 30rpx;
+  .user-info {
+    background-color: white;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 
-    .user-info {
-      background: #fff;
-      border-radius: 20rpx;
-      padding: 40rpx;
-    }
+    .avatar, .nickname, .password {
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 20px;
+        border-bottom: 1px solid #f0f0f0;
 
-    .button {
-      height: 80rpx;
-      text-align: center;
-      line-height: 80rpx;
-      margin: 30rpx 20rpx;
-      color: #fff;
-      border-radius: 80rpx;
-      font-size: 30rpx;
-      background-color: #1296db;
-    }
-  }
-}
+        &:last-child {
+          border-bottom: none;
+        }
 
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20rpx 0;
-  border-bottom: 1px solid #eee;
+        .left {
+          font-size: 18px;
+          font-weight: 600;
+          color: #333;
+        }
 
-  .left {
-    font-size: 32rpx;
-    font-weight: 500;
-  }
+        .right {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          transition: opacity 0.3s ease;
 
-  .right {
-    color: #828080;
-    font-size: 28rpx;
-    display: flex;
-    align-items: center;
-    gap: 20rpx;
+          &:hover {
+            opacity: 0.8;
+          }
 
-    .txt {
-      font-size: 28rpx;
-    }
+          &.uploading {
+            pointer-events: none;
+            opacity: 0.7;
+          }
 
-    .btn {
-      padding: 4rpx 6rpx;
-      font-size: 24rpx;
-      color: #918b87;
-      border: 1px solid #ccc;
-      border-radius: 8rpx;
-    }
+          .img {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 12px;
+            border: 3px solid #e9ecef;
+            transition: border-color 0.3s ease;
 
-    .img {
-      height: 100rpx;
-      width: 100rpx;
+            &:hover {
+              border-color: #1296db;
+            }
 
-      image {
-        height: 100%;
-        width: 100%;
-        border-radius: 50%;
+            image {
+              width: 100%;
+              height: 100%;
+            }
+
+            .upload-mask {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: rgba(0, 0, 0, 0.6);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 50%;
+
+              .loading {
+                color: white;
+                font-size: 14px;
+                font-weight: 500;
+              }
+            }
+          }
+
+          .txt {
+            font-size: 16px;
+            color: #666;
+            margin-right: 12px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+          }
+
+          .radio {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            color: #666;
+
+            radio {
+              margin-right: 8px;
+            }
+          }
+        }
       }
+    }
+  }
 
-      margin-right: 10rpx;
+  .button {
+    background: linear-gradient(135deg, #1296db 0%, #0e7bb8 100%);
+    color: white;
+    border-radius: 25px;
+    height: 56px;
+    line-height: 56px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 4px 12px rgba(18, 150, 219, 0.3);
+    transition: all 0.3s ease;
+
+    &:active {
+      background: linear-gradient(135deg, #0e7bb8 0%, #0a5d8a 100%);
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(18, 150, 219, 0.4);
     }
   }
 }
 
-
+// 昵称修改弹窗样式优化
 .nickNamePopup {
-  padding: 30rpx;
-  border-radius: 30rpx;
-
   .container {
-    padding: 30rpx;
-    background: #fff;
-    border-radius: 20rpx;
+    padding: 28px;
+    border-radius: 16px;
 
     .popHeader {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
 
       .title {
-        color: #1296db;
-        font-size: 26rpx;
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
       }
 
       .close {
-        padding: 6rpx;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background-color: #f8f9fa;
+        }
       }
     }
 
     .content {
-      padding: 30rpx 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      margin-bottom: 28px;
 
       .input {
         width: 100%;
-        height: 100rpx;
-        font-size: 28rpx;
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 20rpx;
+        padding: 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+        background-color: #fafbfc;
+
+        &:focus {
+          border-color: #1296db;
+          background-color: white;
+          outline: none;
+        }
       }
     }
 
     .footer {
-      padding: 10rpx 0;
+      text-align: center;
+
+      .submit-btn {
+        background: linear-gradient(135deg, #1296db 0%, #0e7bb8 100%);
+        color: white;
+        border-radius: 25px;
+        padding: 14px 40px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(18, 150, 219, 0.3);
+        transition: all 0.3s ease;
+
+        &:active {
+          background: linear-gradient(135deg, #0e7bb8 0%, #0a5d8a 100%);
+          transform: translateY(1px);
+        }
+      }
+    }
+  }
+}
+
+// 密码修改弹窗样式优化
+.passwordPopup {
+  .container {
+    padding: 28px;
+    border-radius: 16px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+
+    .popHeader {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      .submit-btn{
-        background-color: #1296db;
-        color:#fff;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .close {
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background-color: #f8f9fa;
+        }
+      }
+    }
+
+    .content {
+      margin-bottom: 28px;
+
+      // 重写AtInput样式
+      .at-input {
+        margin-bottom: 20px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #e9ecef;
+        background-color: #fafbfc;
+        transition: all 0.3s ease;
+
+        &:focus-within {
+          border-color: #1296db;
+          background-color: white;
+          box-shadow: 0 0 0 3px rgba(18, 150, 219, 0.1);
+        }
+
+        .at-input__title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #495057;
+          padding: 16px 16px 8px 16px;
+          margin-bottom: 0;
+        }
+
+        .at-input__input {
+          padding: 8px 16px 16px 16px;
+          font-size: 16px;
+          border: none;
+          background: transparent;
+
+          input {
+            font-size: 16px;
+            color: #333;
+
+            &::placeholder {
+              color: #adb5bd;
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+
+      .submit-btn {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border-radius: 25px;
+        padding: 14px 40px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        transition: all 0.3s ease;
+        min-width: 160px;
+
+        &:active {
+          background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+          transform: translateY(1px);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
       }
     }
   }

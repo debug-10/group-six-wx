@@ -199,55 +199,6 @@ const Login = () => {
     }
   }
 
-  // 微信一键登录
-  const handleWechatLogin = async () => {
-    setLoading(true)
-    Taro.showLoading({ title: '微信登录中...' })
-
-    try {
-      // 获取微信登录code
-      const loginRes = await Taro.login()
-      if (loginRes.code) {
-        // 调用后端微信登录接口
-        const res = await wechatLogin(loginRes.code)
-        if (res.data.code === 0) {
-          Taro.setStorageSync('token', res.data.data.accessToken)
-          await getLoginUserInfo()
-
-          Taro.showToast({
-            title: '微信登录成功',
-            icon: 'success',
-          })
-
-          setTimeout(() => {
-            Taro.switchTab({
-              url: '/pages/index/index',
-            })
-          }, 1500)
-        } else {
-          Taro.showToast({
-            title: res.data.msg || '微信登录失败',
-            icon: 'none',
-          })
-        }
-      } else {
-        Taro.showToast({
-          title: '获取微信授权失败',
-          icon: 'none',
-        })
-      }
-    } catch (error) {
-      console.error('微信登录失败:', error)
-      Taro.showToast({
-        title: '微信登录失败，请重试',
-        icon: 'none',
-      })
-    } finally {
-      setLoading(false)
-      Taro.hideLoading()
-    }
-  }
-
   const handleInputCode = e => {
     setMobileForm({ ...mobileForm, code: e.detail.value })
   }
@@ -268,12 +219,6 @@ const Login = () => {
   const handleSendCode = () => {
     if (loading) return
     sendMobileCode()
-  }
-
-  // 修复微信登录按钮的事件处理
-  const handleWechatLoginClick = () => {
-    if (loading) return
-    handleWechatLogin()
   }
 
   return (
@@ -352,20 +297,6 @@ const Login = () => {
           </View>
         </AtTabsPane>
       </AtTabs>
-
-      <View className="extra">
-        <View className="caption">
-          <Text>其他登录方式</Text>
-        </View>
-        <View className="options">
-          <Text
-            className={`icon icon-weixin ${loading ? 'disabled' : ''}`}
-            onClick={handleWechatLoginClick}
-          >
-            微信一键登录
-          </Text>
-        </View>
-      </View>
       <View className="tips">登录/注册即视为同意《服务条款》和《隐私协议》</View>
     </View>
   )
