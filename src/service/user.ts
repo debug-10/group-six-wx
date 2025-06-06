@@ -1,9 +1,9 @@
-import { http } from '@/utils/http'
+import { http, uploadFile } from '@/utils/http'
 
 export const sendCode = (mobile: string) => {
   return http<null>({
     method: 'POST',
-    url: `/api/auth/send/code?mobile=${mobile}`,
+    url: `/user/api/auth/send/code?mobile=${mobile}`,
   })
 }
 
@@ -11,7 +11,7 @@ export const sendCode = (mobile: string) => {
 export const mobileLogin = (data: MobileLoginDTO) => {
   return http<MobileLoginVO>({
     method: 'POST',
-    url: `/api/auth/mobile`, // 这个路径是正确的
+    url: `/user/api/auth/mobile`, // 这个路径是正确的
     data,
   })
 }
@@ -19,38 +19,38 @@ export const mobileLogin = (data: MobileLoginDTO) => {
 export const accountLogin = (data: AccountLoginDTO) => {
   return http<AccountLoginVO>({
     method: 'POST',
-    url: `/api/auth/login`,
+    url: `/user/api/auth/login`,
     data,
-  })
-}
-
-// 新增微信登录接口
-export const wechatLogin = (code: string) => {
-  return http<AccountLoginVO>({
-    method: 'POST',
-    url: `/api/auth/wechat`,
-    data: { code },
   })
 }
 
 export const getUserInfo = () => {
   return http<UserVO>({
     method: 'GET',
-    url: `/api/user/info`,
+    url: `/user/api/user/info`,
   })
 }
 
 export const logout = () => {
   return http<null>({
     method: 'POST',
-    url: `/api/auth/logout`,
+    url: `/user/api/auth/logout`,
   })
 }
 
 export const updateUser = (data: UserDTO) => {
   return http<string>({
     method: 'PUT',
-    url: `/api/user/update`,
+    url: `/user/api/user/update`,
     data,
   })
+}
+
+// 头像上传接口 - 使用统一的工具函数
+export const uploadAvatar = (filePath: string) => {
+  return uploadFile<string>({
+    url: '/user/api/file/upload',
+    filePath,
+    name: 'file',
+  }).then(result => result.data)
 }

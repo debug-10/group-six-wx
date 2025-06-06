@@ -1,38 +1,51 @@
-type MobileLoginDTO = {
+// 用户信息VO
+interface UserVO {
+  id: number
+  username?: string
+  nickname: string
+  mobile: string
+  avatar: string
+  avatarUrl?: string
+  phone?: string
+  gender?: number
+  createTime?: string
+  role?: number
+  tenantId?: number
+}
+
+// 用户信息DTO
+interface UserDTO {
+  username?: string
+  password?: string
+  nickname?: string
+  avatar?: string
+}
+
+// 手机号登录DTO
+interface MobileLoginDTO {
   mobile: string
   code: string
 }
 
-type MobileLoginVO = {
-  id: number
-  mobile: string
+// 手机号登录VO
+interface MobileLoginVO {
   accessToken: string
+  user: UserVO
 }
 
-type UserVO = {
-  id: number
-  mobile: string
-  nickname: string
-  avatar: string
-  gender: number
-  createTime: string
-}
-
-type UserDTO = {
-  id: number
-  nickname: string
-  avatar: string
-  gender: number
-}
-
+// 账号密码登录DTO
 interface AccountLoginDTO {
   username: string
   password: string
 }
 
+// 账号密码登录VO
 interface AccountLoginVO {
-  id: number
-  username: string
   accessToken: string
-  refreshToken: string
+  user: UserVO
+}
+
+// 微信登录DTO
+interface WechatLoginDTO {
+  code: string
 }
