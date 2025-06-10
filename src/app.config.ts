@@ -6,6 +6,8 @@ export default defineAppConfig({
     'pages/my/password/index', // 添加修改密码页面
     'pages/notice/index',
     'pages/pageUser/userInfo/index',
+    'pages/device/fan/index',
+    'pages/device/light/index',
   ],
   window: {
     backgroundTextStyle: 'light',

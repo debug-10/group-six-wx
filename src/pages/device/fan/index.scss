@@ -1,0 +1,297 @@
+.fan-control {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+
+        &.status-0 {
+          background-color: #999999;
+        }
+
+        &.status-1 {
+          background-color: #52c41a;
+        }
+      }
+
+      .status-text {
+        font-size: 14px;
+        color: #666;
+      }
+    }
+  }
+
+  .fan-image {
+    width: 200px;
+    height: 200px;
+    margin: 30px auto;
+    display: block;
+
+    &.rotating {
+      animation: rotate 2s linear infinite;
+    }
+
+    &.rotating-fast {
+      animation: rotate 0.5s linear infinite;
+    }
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .control-panel {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+
+      .control-button {
+        height: 80px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        &.normal {
+          background-color: #e6f7ff;
+          color: #1890ff;
+          &.active {
+            background-color: #1890ff;
+            color: #fff;
+          }
+        }
+
+        &.powerful {
+          background-color: #fff1f0;
+          color: #ff4d4f;
+          &.active {
+            background-color: #ff4d4f;
+            color: #fff;
+          }
+        }
+
+        &.off {
+          background-color: #f5f5f5;
+          color: #666;
+          &.active {
+            background-color: #666;
+            color: #fff;
+          }
+        }
+
+        .button-icon {
+          font-size: 24px;
+          margin-bottom: 8px;
+        }
+
+        .button-text {
+          font-size: 14px;
+        }
+      }
+    }
+
+    .timer-panel {
+      margin-top: 20px;
+
+      .timer-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+
+      .timer-options {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+
+        .timer-option {
+          text-align: center;
+          padding: 10px 0;
+          background-color: #f5f5f5;
+          border-radius: 6px;
+          font-size: 14px;
+
+          &.active {
+            background-color: #1890ff;
+            color: #fff;
+          }
+
+          &.custom {
+            background-color: #e6f7ff;
+            color: #1890ff;
+          }
+        }
+      }
+
+      .custom-timer {
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+
+        .custom-timer-title {
+          font-size: 16px;
+          font-weight: bold;
+          margin-bottom: 12px;
+          color: #333;
+        }
+
+        .custom-timer-input {
+          display: flex;
+          align-items: center;
+
+          .timer-input {
+            flex: 1;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 16px;
+            background-color: #fff;
+          }
+
+          .apply-timer-btn {
+            margin-left: 12px;
+            background-color: #1890ff;
+            color: white;
+            text-align: center;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
+    }
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    width: 80%;
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal-header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .modal-close {
+      padding: 4px;
+    }
+  }
+
+  .modal-body {
+    padding: 20px;
+
+    .custom-timer-input {
+      display: flex;
+      align-items: center;
+
+      .timer-input {
+        flex: 1;
+        height: 44px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 0 12px;
+        font-size: 16px;
+        background-color: #fff;
+      }
+
+      .timer-unit {
+        margin-left: 10px;
+        font-size: 16px;
+        color: #666;
+      }
+    }
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid #f0f0f0;
+
+    .modal-btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 16px;
+      margin-left: 12px;
+
+      &.cancel {
+        background-color: #f5f5f5;
+        color: #666;
+      }
+
+      &.confirm {
+        background-color: #1890ff;
+        color: #fff;
+      }
+    }
+  }
+}

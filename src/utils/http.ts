@@ -14,9 +14,8 @@ interface RequestResponse<T = any> {
   errMsg: string
 }
 
-// 基础URL配置 - 更新为你的后端网关地址
-const BASE_URL = 'http://localhost:8080' // 开发环境
-// const BASE_URL = 'http://121.4.51.19:8080' // 生产环境
+const BASE_URL = 'http://localhost:8080'
+// const BASE_URL = 'http://121.4.51.19:8080'
 
 type Data<T> = {
   code: number
@@ -35,17 +34,14 @@ export const http = <T>(config: RequestConfig): Promise<RequestResponse<Data<T>>
   })
 }
 
-// 请求拦截器
 const httpInterceptor = function (chain) {
   const requestParams = chain.requestParams
   const { url } = requestParams
 
-  // 如果不是完整的URL，添加基础URL
   if (!url.startsWith('http')) {
     requestParams.url = BASE_URL + url
   }
 
-  // 添加通用header
   requestParams.header = {
     'Content-Type': 'application/json',
     ...requestParams.header,
@@ -54,7 +50,7 @@ const httpInterceptor = function (chain) {
   // 添加token
   const token = Taro.getStorageSync('token')
   if (token) {
-    requestParams.header.Authorization = token // 直接使用token，后端已经是JWT格式
+    requestParams.header.Authorization = token
   }
 
   return chain
@@ -62,7 +58,6 @@ const httpInterceptor = function (chain) {
     .then(res => {
       // 处理响应
       if (res.statusCode === 401) {
-        // 未授权，清除token并跳转到登录页
         Taro.removeStorageSync('token')
         Taro.removeStorageSync('user')
         Taro.navigateTo({ url: '/pages/login/index' })

@@ -71,7 +71,7 @@
         margin-bottom: 16px;
 
         .title-text {
-          font-size: 18px;
+          font-size: 26px;
           font-weight: bold;
           color: #333;
         }
@@ -83,10 +83,10 @@
           align-items: center;
 
           .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            margin-right: 6px;
+            margin-right: 12px;
 
             &.status-0 {
               background-color: #999999;
@@ -98,7 +98,7 @@
           }
 
           .status-text {
-            font-size: 14px;
+            font-size: 20px;
             color: #666;
           }
         }

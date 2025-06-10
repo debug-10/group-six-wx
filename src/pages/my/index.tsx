@@ -23,15 +23,15 @@ export default function My() {
     try {
       setLoading(true)
       const response = await getUserInfo()
-      if (response.code === 0) {
+      if (response.data && response.data.code === 0) {
         const userData = {
-          id: response.data.id,
-          nickname: response.data.nickname,
-          avatar: response.data.avatarUrl,
-          mobile: response.data.phone,
-          username: response.data.username,
-          role: response.data.role,
-          tenantId: response.data.tenantId,
+          id: response.data.data.id,
+          nickname: response.data.data.nickname,
+          avatar: response.data.data.avatarUrl, // 确保正确映射avatarUrl到avatar
+          mobile: response.data.data.phone,
+          username: response.data.data.username,
+          role: response.data.data.role,
+          tenantId: response.data.data.tenantId,
         }
         dispatch(setUserInfo(userData))
         // 同步到本地存储

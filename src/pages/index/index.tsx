@@ -102,6 +102,43 @@ const Index: React.FC = () => {
     }
   }
 
+  const handleSceneClick = userDevice => {
+    // 如果是夜灯场景（type为1），跳转到夜灯控制页面
+    if (userDevice.type === 1) {
+      // 获取第一个设备的ID作为参数传递
+      const deviceId =
+        userDevice.devices && userDevice.devices.length > 0 ? userDevice.devices[0].id : null
+
+      if (deviceId) {
+        Taro.navigateTo({
+          url: `/pages/device/light/index?id=${deviceId}`,
+        })
+      } else {
+        Taro.showToast({
+          title: '未找到可用设备',
+          icon: 'none',
+        })
+      }
+    }
+    // 如果是风扇场景（type为3），跳转到风扇控制页面
+    else if (userDevice.type === 3) {
+      // 获取第一个设备的ID作为参数传递
+      const deviceId =
+        userDevice.devices && userDevice.devices.length > 0 ? userDevice.devices[0].id : null
+
+      if (deviceId) {
+        Taro.navigateTo({
+          url: `/pages/device/fan/index?id=${deviceId}`,
+        })
+      } else {
+        Taro.showToast({
+          title: '未找到可用设备',
+          icon: 'none',
+        })
+      }
+    }
+  }
+
   // 添加设备
   const handleAddDevice = async () => {
     if (!deviceMac.trim()) {
@@ -244,7 +281,11 @@ const Index: React.FC = () => {
             {userDevices.map(userDevice => {
               const sceneStatus = getSceneStatus(userDevice.devices)
               return (
-                <View key={userDevice.id} className="scene-card">
+                <View
+                  key={userDevice.id}
+                  className="scene-card"
+                  onClick={() => handleSceneClick(userDevice)}
+                >
                   {/* 场景标题 */}
                   <View className="scene-title">
                     <Text className="title-text">

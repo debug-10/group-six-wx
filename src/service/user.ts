@@ -49,7 +49,7 @@ export const updateUser = (data: UserDTO) => {
 // 头像上传接口 - 使用统一的工具函数
 export const uploadAvatar = (filePath: string) => {
   return uploadFile<string>({
-    url: '/user/api/file/upload',
+    url: '/user/api/file/upload/avatar', // 修改为专用的头像上传接口
     filePath,
     name: 'file',
   }).then(result => result.data)

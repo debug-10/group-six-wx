@@ -15,7 +15,6 @@ const UserInfo = () => {
     id: userInfo.id,
     nickname: '',
     avatar: '',
-    // 删除 gender 字段
   })
 
   useEffect(() => {
@@ -42,9 +41,7 @@ const UserInfo = () => {
     newPassword: '',
     confirmPassword: '',
   })
-  const [passwordLoading, setPasswordLoading] = useState(false)
 
-  // 点击昵称触发弹窗显示并填充当前昵称
   const onNickNameChange = () => {
     setNickname(myUserInfo.nickname)
     setIsOpenUserName(true)
@@ -56,7 +53,6 @@ const UserInfo = () => {
   // 添加密码修改相关函数
   const onPasswordChange = () => {
     setPasswordForm({
-      oldPassword: '',
       newPassword: '',
       confirmPassword: '',
     })
@@ -72,7 +68,6 @@ const UserInfo = () => {
     })
   }
 
-  // 处理密码修改确认
   // 处理密码修改确认
   const handlePasswordConfirm = async () => {
     const { newPassword, confirmPassword } = passwordForm
@@ -100,10 +95,8 @@ const UserInfo = () => {
       })
       return
     }
-    // 验证通过，将新密码设置到用户信息中
     setMyUserInfo(prev => ({ ...prev, password: newPassword }))
 
-    // 关闭弹窗并清空表单
     setIsOpenPassword(false)
     setPasswordForm({
       newPassword: '',
@@ -116,11 +109,9 @@ const UserInfo = () => {
     })
   }
 
-  // 获取Redux的dispatch
   const dispatch = useAppDispatch()
 
   const validateImageFile = (file: any) => {
-    // 检查文件大小
     if (file.size > 5 * 1024 * 1024) {
       Taro.showToast({
         title: '图片大小不能超过5MB',
@@ -180,6 +171,7 @@ const UserInfo = () => {
         })
 
         try {
+          // 使用专用的头像上传接口，后端会自动更新用户头像
           const avatarUrl = await uploadAvatar(tempFile.tempFilePath)
 
           // 更新本地状态
@@ -187,6 +179,9 @@ const UserInfo = () => {
 
           // 更新全局状态
           dispatch(setUserInfo({ ...userInfo, avatar: avatarUrl }))
+
+          // 可以考虑在这里重新获取一次用户信息，确保数据同步
+          // await loadUserInfo()
 
           Taro.hideLoading()
           Taro.showToast({
@@ -205,14 +200,6 @@ const UserInfo = () => {
         } finally {
           setUploading(false)
         }
-      },
-      fail: error => {
-        console.error('选择图片失败:', error)
-        Taro.showToast({
-          title: '选择图片失败',
-          icon: 'none',
-          duration: 2000,
-        })
       },
     })
   }
@@ -263,29 +250,19 @@ const UserInfo = () => {
         nickname: myUserInfo.nickname,
       }
 
-      // 如果有头像变更，也一起更新
-      if (myUserInfo.avatar) {
-        updateData.avatar = myUserInfo.avatar
-      }
       if (myUserInfo.password) {
         updateData.password = myUserInfo.password
       }
-
-      console.log('提交的数据:', updateData)
-
       const res = await updateUser(updateData)
-
-      console.log('API响应:', res)
-
       Taro.hideLoading()
 
       if (res.data && res.data.code === 0) {
         Taro.showToast({ title: '修改成功' })
         // 清除本地密码缓存
         setMyUserInfo(prev => ({ ...prev, password: undefined }))
-        dispatch(setUserInfo({ ...userInfo, ...myUserInfo })) // 更新全局用户信息
+        dispatch(setUserInfo({ ...userInfo, ...myUserInfo }))
         setTimeout(() => {
-          Taro.navigateBack({ delta: 1 }) // 返回上一页
+          Taro.navigateBack({ delta: 1 })
         }, 1000)
       } else {
         console.error('API返回错误:', res)
