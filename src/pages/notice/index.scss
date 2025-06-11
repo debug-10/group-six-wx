@@ -1,0 +1,221 @@
+.notice-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+
+  &-header {
+    padding: 32px 32px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin-bottom: 16px;
+
+    .notice-title {
+      font-size: 36px;
+      font-weight: bold;
+      color: #fff;
+      display: block;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .refresh-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+
+      .refresh-btn {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:active {
+          transform: scale(0.95);
+        }
+
+        &.refreshing {
+          animation: rotate 1s linear infinite;
+        }
+
+        text {
+          font-size: 32px;
+        }
+      }
+
+      .refresh-text {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 24px;
+      }
+    }
+  }
+
+  .no-alarms {
+    text-align: center;
+    padding: 120px 32px;
+
+    text {
+      font-size: 32px;
+      color: #999;
+      display: block;
+    }
+  }
+
+  .alarm-list {
+    padding: 0 16px 32px;
+  }
+
+  .alarm-item {
+    background: #fff;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #ff6b6b;
+    position: relative;
+
+    .alarm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+
+      .alarm-info {
+        flex: 1;
+
+        .device-name {
+          font-size: 32px;
+          font-weight: bold;
+          color: #333;
+          display: block;
+          margin-bottom: 8px;
+        }
+
+        .alarm-time {
+          font-size: 24px;
+          color: #666;
+          display: block;
+        }
+      }
+
+      .mark-processed-btn {
+        width: 60px;
+        height: 60px;
+        background: #4ecdc4;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:active {
+          transform: scale(0.95);
+          background: #45b7aa;
+        }
+
+        text {
+          color: #fff;
+          font-size: 32px;
+          font-weight: bold;
+        }
+      }
+    }
+
+    .alarm-content {
+      .alarm-message {
+        font-size: 28px;
+        color: #555;
+        line-height: 1.5;
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 12px;
+        border-left: 4px solid #ff6b6b;
+
+        text {
+          display: block;
+        }
+      }
+    }
+
+    // 不同告警级别的颜色
+    &.level-1 {
+      border-left-color: #ffd93d; // 低级告警 - 黄色
+
+      .alarm-content .alarm-message {
+        border-left-color: #ffd93d;
+      }
+    }
+
+    &.level-2 {
+      border-left-color: #ff9f43; // 中级告警 - 橙色
+
+      .alarm-content .alarm-message {
+        border-left-color: #ff9f43;
+      }
+    }
+
+    &.level-3 {
+      border-left-color: #ff6b6b; // 高级告警 - 红色
+
+      .alarm-content .alarm-message {
+        border-left-color: #ff6b6b;
+      }
+    }
+  }
+
+  .loading {
+    text-align: center;
+    padding: 120px 32px;
+    font-size: 32px;
+    color: #666;
+  }
+}
+
+.alarm-card {
+  margin-bottom: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &.unhandled {
+    border-left: 8px solid #ed3f14;
+  }
+
+  &.handled {
+    opacity: 0.7;
+  }
+
+  .alarm-content {
+    .alarm-message {
+      margin-bottom: 16px;
+
+      text {
+        font-size: 28px;
+        color: #333;
+        line-height: 1.5;
+      }
+    }
+
+    .alarm-tags {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .alarm-actions {
+      text-align: right;
+    }
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

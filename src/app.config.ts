@@ -8,6 +8,7 @@ export default defineAppConfig({
     'pages/pageUser/userInfo/index',
     'pages/device/fan/index',
     'pages/device/light/index',
+    'pages/my/unbind/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -29,7 +30,7 @@ export default defineAppConfig({
         selectedIconPath: 'static/tabs/home_selected.png',
       },
       {
-        text: '公告',
+        text: '告警信息',
         pagePath: 'pages/notice/index',
         iconPath: 'static/tabs/notice.png',
         selectedIconPath: 'static/tabs/notice_selected.png',

@@ -56,6 +56,13 @@ export default function My() {
     })
   }
 
+  // 添加跳转到解绑设备页面的方法
+  const handleUnbindDevice = () => {
+    Taro.navigateTo({
+      url: '/pages/my/unbind/index',
+    })
+  }
+
   const handleLogout = async () => {
     Taro.showModal({
       title: '提示',
@@ -152,6 +159,12 @@ export default function My() {
           arrow="right"
           iconInfo={{ size: 20, color: '#007aff', value: 'user' }}
           onClick={handleEditProfile}
+        />
+        <AtListItem
+          title="解绑设备"
+          arrow="right"
+          iconInfo={{ size: 20, color: '#ff4d4f', value: 'trash' }}
+          onClick={handleUnbindDevice}
         />
       </AtList>
 

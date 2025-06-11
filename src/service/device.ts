@@ -17,6 +17,15 @@ export const addDeviceToUser = (data: { deviceMac: string }) => {
   })
 }
 
+// 解绑用户设备
+export const unbindUserDevice = (data: { type: number }) => {
+  return http<Result<string>>({
+    method: 'POST',
+    url: '/user/api/device/unbind',
+    data,
+  })
+}
+
 // 风扇控制 - 开启普通模式
 export const startFanNormalMode = () => {
   return http<Result<any>>({

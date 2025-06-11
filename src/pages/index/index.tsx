@@ -14,6 +14,7 @@ import {
 import Taro, { useDidShow } from '@tarojs/taro'
 import { getUserDevices, addDeviceToUser } from '@/service/device'
 import { getLatestNews } from '@/service/news'
+import { getWeather } from '@/service/weather'
 import './index.scss'
 
 // 场景类型映射
@@ -41,6 +42,10 @@ const Index: React.FC = () => {
   // 新增公告相关状态
   const [latestNews, setLatestNews] = useState<NewsVO | null>(null)
   const [newsLoading, setNewsLoading] = useState(false)
+
+  // 新增天气相关状态
+  const [weather, setWeather] = useState<any>(null)
+  const [weatherLoading, setWeatherLoading] = useState(false)
 
   // 检查登录状态
   const checkLoginStatus = () => {
@@ -99,6 +104,23 @@ const Index: React.FC = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 新增获取天气信息的函数
+  const fetchWeather = async () => {
+    setWeatherLoading(true)
+    try {
+      // 默认获取北京的天气，实际应用中可以根据用户位置获取
+      const res = await getWeather('Nanjing')
+      if (res.statusCode === 200) {
+        setWeather(res.data)
+      }
+    } catch (error) {
+      console.error('获取天气信息失败:', error)
+      // 静默失败，不显示错误提示
+    } finally {
+      setWeatherLoading(false)
     }
   }
 
@@ -210,10 +232,13 @@ const Index: React.FC = () => {
     }
   }
 
-  // 组件挂载时检查登录状态并获取公告
+  // 组件挂载时检查登录状态并获取公告和天气
   useEffect(() => {
     const token = checkLoginStatus()
     setHasToken(token)
+
+    // 获取天气信息
+    fetchWeather()
 
     // 获取最新公告（无论是否登录都显示）
     fetchLatestNews()
@@ -229,6 +254,9 @@ const Index: React.FC = () => {
   useDidShow(() => {
     const token = checkLoginStatus()
     setHasToken(token)
+
+    // 刷新天气信息
+    fetchWeather()
 
     // 刷新公告
     fetchLatestNews()
@@ -250,6 +278,33 @@ const Index: React.FC = () => {
         <View className="add-btn" onClick={() => setShowAddModal(true)}>
           <AtIcon value="add" size="24" color="#007aff" />
         </View>
+      </View>
+
+      {/* 天气信息 */}
+      <View className="weather">
+        {weatherLoading ? (
+          <Text className="weather-loading">天气加载中...</Text>
+        ) : weather ? (
+          <View className="weather-content">
+            <View className="weather-location">
+              <AtIcon value="map-pin" size="18" color="#007aff" />
+              <Text className="location-text">{weather.cityName || weather.name}</Text>
+            </View>
+            <View className="weather-info">
+              <Text className="weather-temp">
+                {weather.main?.getTempWithUnit
+                  ? weather.main.getTempWithUnit()
+                  : `${Math.round(weather.main?.temp || 0)}℃`}
+              </Text>
+              <Text className="weather-desc">
+                {weather.weatherDescCn ||
+                  (weather.weather && weather.weather[0] ? weather.weather[0].description : '')}
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <Text className="weather-error">暂无天气信息</Text>
+        )}
       </View>
 
       {/* 系统公告 - 修改为动态获取 */}
